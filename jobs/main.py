@@ -81,6 +81,56 @@ def generate_emergency_incident_data(device_id, timestamp, location):
         'description': 'Description of the incident'
     }
 
+def simulate_vehicle_movement():
+    global start_location
+    # move towards birmingham
+    start_location['latitude'] += LATITUDE_INCREMENT
+    start_location['longitude'] += LONGITUDE_INCREMENT
+
+    # add some randomness to simulate actual road travel
+    start_location['latitude'] += random.uniform(-0.0005, 0.0005)
+    start_location['longitude'] += random.uniform(-0.0005, 0.0005)
+
+    return start_location  
+
+def generate_vehicle_data(device_id):
+    location = simulate_vehicle_movement()
+    return {
+        'id': uuid.uuid4(),
+        'deviceId': device_id,
+        'timestamp': get_next_time().isoformat(),
+        'location': (location['latitude'], location['longitude']),
+        'speed': random.uniform(10, 40),
+        'direction': 'North-East',
+        'make': 'BMW',
+        'model': 'C500',
+        'year': 2024,
+        'fuelType': 'Hybrid'
+    }
+
+def json_serializer(obj):
+    if isinstance(obj, uuid.UUID):
+        return str(obj)
+    raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
+
+
+def delivery_report(err, msg):
+    if err is not None:
+        print(f'Message delivery failed: {err}')
+    else:
+        print(f'Message delivered to {msg.topic()} [{msg.partition()}]')
+
+
+def produce_data_to_kafka(producer, topic, data):
+    producer.produce(
+        topic,
+        key=str(data['id']),
+        value=json.dumps(data, default=json_serializer).encode('utf-8'),
+        on_delivery=delivery_report
+    )
+
+    producer.flush()      
+
 
 
 if __name__ == "__main__":
