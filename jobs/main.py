@@ -129,7 +129,30 @@ def produce_data_to_kafka(producer, topic, data):
         on_delivery=delivery_report
     )
 
-    producer.flush()      
+    producer.flush()
+
+def simulate_journey(producer, device_id):
+    while True:
+        vehicle_data = generate_vehicle_data(device_id)
+        gps_data = generate_gps_data(device_id, vehicle_data['timestamp'])
+        traffic_camera_data = generate_traffic_camera_data(device_id, vehicle_data['timestamp'],
+                                                           vehicle_data['location'], 'Nikon-Cam123')
+        weather_data = generate_weather_data(device_id, vehicle_data['timestamp'], vehicle_data['location'])
+        emergency_incident_data = generate_emergency_incident_data(device_id, vehicle_data['timestamp'],
+                                                                   vehicle_data['location'])
+
+        if (vehicle_data['location'][0] >= BINGHAMTON_COORDINATES['latitude']
+                and vehicle_data['location'][1] <= BINGHAMTON_COORDINATES['longitude']):
+            print('Vehicle has reached Binghamton. Simulation ending...')
+            break
+
+        produce_data_to_kafka(producer, VEHICLE_TOPIC, vehicle_data)
+        produce_data_to_kafka(producer, GPS_TOPIC, gps_data)
+        produce_data_to_kafka(producer, TRAFFIC_TOPIC, traffic_camera_data)
+        produce_data_to_kafka(producer, WEATHER_TOPIC, weather_data)
+        produce_data_to_kafka(producer, EMERGENCY_TOPIC, emergency_incident_data)
+
+        time.sleep(3)          
 
 
 
