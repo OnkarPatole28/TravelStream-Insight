@@ -3,7 +3,9 @@ import random
 import time
 import uuid
 
-
+from confluent_kafka import SerializingProducer
+import simplejson as json
+from datetime import datetime, timedelta
 
 
 MANHATTAN_COORDINATES = {"latitude": 40.7831, "longitude": -73.9712}
@@ -20,6 +22,15 @@ GPS_TOPIC = os.getenv('GPS_TOPIC', 'gps_data')
 TRAFFIC_TOPIC = os.getenv('TRAFFIC_TOPIC', 'traffic_data')
 WEATHER_TOPIC = os.getenv('WEATHER_TOPIC', 'weather_data')
 EMERGENCY_TOPIC = os.getenv('EMERGENCY_TOPIC', 'emergency_data')
+
+random.seed(42)
+start_time = datetime.now()
+start_location = MANHATTAN_COORDINATES.copy()
+
+def get_next_time():
+    global start_time
+    start_time += timedelta(seconds=random.randint(30, 60))  # update frequency
+    return start_time
 
 def generate_gps_data(device_id, timestamp, vehicle_type='private'):
     return {
