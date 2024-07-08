@@ -18,7 +18,54 @@ def main():
         .getOrCreate()
 
     # Adjust the log level to minimize the console output on executors
-    spark.sparkContext.setLogLevel('WARN')        
+    spark.sparkContext.setLogLevel('WARN')    
+    # vehicle schema
+    vehicleSchema = StructType([
+        StructField("id", StringType(), True),
+        StructField("deviceId", StringType(), True),
+        StructField("timestamp", TimestampType(), True),
+        StructField("location", StringType(), True),
+        StructField("speed", DoubleType(), True),
+        StructField("direction", StringType(), True),
+        StructField("make", StringType(), True),
+        StructField("model", StringType(), True),
+        StructField("year", IntegerType(), True),
+        StructField("fuelType", StringType(), True),
+    ])
+
+    # gpsSchema
+    gpsSchema = StructType([
+        StructField("id", StringType(), True),
+        StructField("deviceId", StringType(), True),
+        StructField("timestamp", TimestampType(), True),
+        StructField("speed", DoubleType(), True),
+        StructField("direction", StringType(), True),
+        StructField("vehicleType", StringType(), True)
+    ])
+
+    # trafficSchema
+    trafficSchema = StructType([
+        StructField("id", StringType(), True),
+        StructField("deviceId", StringType(), True),
+        StructField("cameraId", StringType(), True),
+        StructField("location", StringType(), True),
+        StructField("timestamp", TimestampType(), True),
+        StructField("snapshot", StringType(), True)
+    ])
+
+    # weatherSchema
+    weatherSchema = StructType([
+        StructField("id", StringType(), True),
+        StructField("deviceId", StringType(), True),
+        StructField("location", StringType(), True),
+        StructField("timestamp", TimestampType(), True),
+        StructField("temperature", DoubleType(), True),
+        StructField("weatherCondition", StringType(), True),
+        StructField("precipitation", DoubleType(), True),
+        StructField("windSpeed", DoubleType(), True),
+        StructField("humidity", IntegerType(), True),
+        StructField("airQualityIndex", DoubleType(), True),
+    ])    
 
 
 if __name__ == "__main__":
