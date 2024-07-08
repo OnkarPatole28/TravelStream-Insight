@@ -66,6 +66,44 @@ def main():
         StructField("humidity", IntegerType(), True),
         StructField("airQualityIndex", DoubleType(), True),
     ])    
+    # emergencySchema
+    emergencySchema = StructType([
+        StructField("id", StringType(), True),
+        StructField("deviceId", StringType(), True),
+        StructField("incidentId", StringType(), True),
+        StructField("type", StringType(), True),
+        StructField("timestamp", TimestampType(), True),
+        StructField("location", StringType(), True),
+        StructField("status", StringType(), True),
+        StructField("description", StringType(), True),
+    ])
+    def read_kafka_topic(topic, schema):
+        return (spark.readStream
+                .format('kafka')
+                .option('kafka.bootstrap.servers', 'broker:29092')
+                .option('subscribe', topic)
+                .option('startingOffsets', 'earliest')
+                .load()
+                .selectExpr('CAST(value AS STRING)')
+                .select(from_json(col('value'), schema).alias('data'))
+                .select('data.*')
+                .withWatermark('timestamp', '2 minutes')
+                )
+
+    def streamWriter(input: DataFrame, checkpointFolder, output):
+        return (input.writeStream
+                .format('parquet')
+                .option('checkpointLocation', checkpointFolder)
+                .option('path', output)
+                .outputMode('append')
+                .start())
+
+    vehicleDF = read_kafka_topic('vehicle_data', vehicleSchema).alias('vehicle')
+    gpsDF = read_kafka_topic('gps_data', gpsSchema).alias('gps')
+    trafficDF = read_kafka_topic('traffic_data', trafficSchema).alias('traffic')
+    weatherDF = read_kafka_topic('weather_data', weatherSchema).alias('weather')
+    emergencyDF = read_kafka_topic('emergency_data', emergencySchema).alias('emergency')
+
 
 
 if __name__ == "__main__":
