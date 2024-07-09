@@ -103,6 +103,22 @@ def main():
     trafficDF = read_kafka_topic('traffic_data', trafficSchema).alias('traffic')
     weatherDF = read_kafka_topic('weather_data', weatherSchema).alias('weather')
     emergencyDF = read_kafka_topic('emergency_data', emergencySchema).alias('emergency')
+    
+     # #join all the dfs with id and timestamp
+    # join
+
+    query1 = streamWriter(vehicleDF, 's3a://streaming-data1/checkpoints/vehicle_data',
+                 's3a://streaming-data1/data/vehicle_data')
+    query2 = streamWriter(gpsDF, 's3a://streaming-data1/checkpoints/gps_data',
+                 's3a://streaming-data1/data/gps_data')
+    query3 = streamWriter(trafficDF, 's3a://streaming-data1/checkpoints/traffic_data',
+                 's3a://streaming-data1/data/traffic_data')
+    query4 = streamWriter(weatherDF, 's3a://streaming-data1/checkpoints/weather_data',
+                 's3a://streaming-data1/data/weather_data')
+    query5 = streamWriter(emergencyDF, 's3a://streaming-data1/checkpoints/emergency_data',
+                 's3a://streaming-data1/data/emergency_data')
+
+    query5.awaitTermination()
 
 
 
